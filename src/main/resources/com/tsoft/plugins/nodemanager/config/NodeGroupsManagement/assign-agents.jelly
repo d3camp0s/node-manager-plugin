@@ -1,0 +1,127 @@
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+          xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:local="local">
+
+    <l:layout permission="${app.ADMINISTER}" norefresh="true">
+        <st:include it="${app}" page="sidepanel.jelly"/>
+        <l:main-panel>
+
+            <h1>
+                <img src="${rootURL}${it.iconFileName}" alt="${%Administra las asignaciones de servidores a labels personalizados}"/>
+                ${%Administrar asignaciones de grupos}
+            </h1>
+
+            <style>
+                th.rotate > div > span.notfound {
+                    text-decoration: line-through;
+                }
+            </style>
+
+            <j:set var="agents" value="${it.getFilteredAgents()}"/>
+            <j:set var="nodegroups" value="${it.getFilteredNodeGroups()}"/>
+            <j:set var="totalnodes" value="${agents.size()}"/>
+            <j:set var="all_agents_size" value="${it.countComputers()}"/>
+
+            <link rel="stylesheet" href="${rootURL}${app.VIEW_RESOURCE_PATH}/hudson/security/table.css" type="text/css" />
+            <link rel="stylesheet" href="${rootURL}/plugin/role-strategy/css/role-strategy.css" type="text/css" />
+            <script type="text/javascript" src="${rootURL}/plugin/node-manager/js/table.js" />
+
+            <d:taglib uri="local">
+                <d:tag name="labelRow">
+                  <td class="start">
+                    <a href="#">
+                      <img alt="remove" src="${imagesURL}/16x16/stop.gif"/>
+                    </a>
+                  </td>
+                  <td class="left-most">${label}</td>
+                  <j:forEach var="g" items="${agents}">
+                    <td width="auto">
+                      <f:checkbox name="${g.name}" checked="${nodegroups.get(label).hasAgent(g.name)}"/>
+                    </td>
+                  </j:forEach>
+                  <td class="stop">
+                    <a href="#">
+                      <img alt="remove" src="${imagesURL}/16x16/stop.gif"/>
+                    </a>
+                  </td>
+                </d:tag>
+            </d:taglib>
+
+            <form id="form_search" method="post" action="assign-agents">
+                <table id="dataSearch" class="center-align" name="dataSearch">
+                    <tr>
+                        <td rowspan="2" class="start" />
+                        <td>
+                            <input name="filter" class="prompt" type="text" placeholder="Search ..."></input>
+                            <i class="search link icon" onclick="document.getElementById('form_search').submit();"></i>
+                            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"></input>
+                         </td>
+                         <td colspan="${totalnodes+1}">
+                            <div style="position: relative; width: 100px;">
+                                <span style="font-weight: bold;font-size: 10px;float: left;">Filter: ${totalnodes} of ${all_agents_size}</span>
+                            </div>
+                         </td>
+                    </tr>
+                </table>
+            </form>
+
+            <f:form method="post" name="grupos_agents" action="asignarAgenteToLabel">
+                <table id="globalNodeGroups" class="center-align global-matrix-authorization-strategy-table" name="data">
+
+                     <tr class="group-row">
+                        <th rowspan="2" class="start pane-header"></th>
+                        <th rowspan="2" class="pane-header blank">
+                          ${%Nodo}
+                        </th>
+                        <th class="pane-header" colspan="${totalnodes}">
+                            ${%Agentes conectados a Jenkins}
+                        </th>
+                        <th rowspan="2" class="stop pane-header" />
+                     </tr>
+
+                     <tr class="caption-row">
+                        <j:forEach var="n" items="${agents}">
+                          <th class="pane rotate" tooltip="${n.description}">
+                            <div><span>${n.name}</span></div>
+                          </th>
+                        </j:forEach>
+                     </tr>
+
+                    <j:forEach var="group" items="${nodegroups.values()}">
+                        <tr name="${group.name}" class="permission-row">
+                            <local:labelRow label="${group.name}" />
+                        </tr>
+                    </j:forEach>
+                </table>
+                <br/><br/>
+                <f:block>
+                    <f:submit value="${%Save}" />
+                    <f:apply />
+                </f:block>
+            </f:form>
+        </l:main-panel>
+     </l:layout>
+
+     <script>
+        var tableHighlighter;
+
+        Event.observe(window, 'load', function(event) {
+              tableHighlighter = new TableHighlighter('globalNodeGroups', 2, 2);
+        });
+
+        var deleteAssignedAgentGroup = function(e) {
+         e.onclick = function() {
+            var tr = findAncestor(this,"TR");
+            var c = tr.getElementsByTagName('input');
+            Array.from(c).forEach( v => { v.checked=false; } );
+            return false;
+         }
+         e = null; <!-- avoid memory leak -->
+        }
+        Behaviour.register({
+         "#globalNodeGroups TD.start A" : deleteAssignedAgentGroup,
+         "#globalNodeGroups TD.stop A" : deleteAssignedAgentGroup
+        });
+     </script>
+ </j:jelly>

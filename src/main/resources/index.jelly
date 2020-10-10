@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+    Permite crear agrupaciones de nodos e iterarlas en el pipeline mediante los step: multinode / nodeutils
+</div>

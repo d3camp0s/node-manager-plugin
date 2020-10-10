@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Node Manager Plugin" default="build" basedir=".">
+	<description>
+		Build de proyecto maven mediante el comando 'mvn package -Dmaven.test.skip=true' y copia del .hpi a la ruta ${JENKINS_HOME}
+    </description>
+	<tstamp>
+		<format property="build_date" pattern="ddMMyyyyHHmm" offset="0" unit="hour" />
+	</tstamp>
+	<property name="PLUGIN_NAME" value="node-manager" />
+	<property name="JENKINS_HOME" value="/Users/diego.campos/docker/data/jenkins_home/plugins" />
+	<property name="target" value="${basedir}/target" />
+
+	<!-- target: default  -->
+	<target name="build" depends="clean_plugins,compile,copy_hpi,restart_jenkins" description="compilacion y deoploy de hpi"></target>
+
+	<target name="compile">
+		<exec executable="mvn">
+			<arg value="package"/>
+			<arg value="-Dmaven.test.skip=true"/>
+		</exec>
+	</target>
+
+	<target name="clean_plugins">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${JENKINS_HOME}/${PLUGIN_NAME}"/>
+		</delete>
+		<delete failonerror="false">
+			<fileset dir="${JENKINS_HOME}" includes="${PLUGIN_NAME}.*"/>
+		</delete>
+	</target>
+
+	<target name="copy_hpi">
+		<copy todir="${JENKINS_HOME}">
+			<fileset dir="${target}">
+				<include name="**.hpi" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="restart_jenkins">
+		<exec executable="docker">
+			<arg value="restart"/>
+			<arg value="jenkins-server"/>
+		</exec>
+	</target>
+
+</project>

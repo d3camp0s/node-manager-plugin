@@ -1,0 +1,29 @@
+
+.assign-agents-table TD.start {
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.assign-agents-table .caption-row th, .group-row td {
+  padding: 3px;
+}
+
+.highlighted {
+  background-color: #FFF9C9;
+}
+
+#matchingJobsForPattern ul {
+  list-style: none;
+}
+
+.matchingJobsDialog {
+  top: 50vh !important;
+  left: 50vw !important;
+}
+
+.matchingJobsDialog .ui-widget-header {
+  border: 1px solid #D3D7CF;
+  background: #D3D7CF;
+  color: #000000;
+}
